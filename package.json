@@ -5,7 +5,7 @@
   "type": "module",
   "main": "mcp-test-server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node working-server.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
