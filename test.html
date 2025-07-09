@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MCP Server Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>MCP Server Test Page</h1>
+    
+    <div id="status"></div>
+    
+    <h2>Server Info</h2>
+    <p>Server: <span id="server-url"></span></p>
+    
+    <h2>Tests</h2>
+    <button onclick="testHealth()">Test Health Endpoint</button>
+    <button onclick="testSSE()">Test SSE Connection</button>
+    <button onclick="listResources()">List Resources</button>
+    
+    <h2>Output</h2>
+    <pre id="output"></pre>
+
+    <script>
+        const serverUrl = window.location.origin;
+        document.getElementById('server-url').textContent = serverUrl;
+        
+        function log(message, isError = false) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toISOString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            if (isError) {
+                console.error(message);
+            } else {
+                console.log(message);
+            }
+        }
+        
+        function setStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.className = 'status ' + (isError ? 'error' : 'success');
+            status.textContent = message;
+        }
+        
+        async function testHealth() {
+            try {
+                log('Testing health endpoint...');
+                const response = await fetch(`${serverUrl}/health`);
+                const data = await response.json();
+                log('Health check response: ' + JSON.stringify(data, null, 2));
+                setStatus('Health check successful!');
+            } catch (error) {
+                log('Health check failed: ' + error.message, true);
+                setStatus('Health check failed: ' + error.message, true);
+            }
+        }
+        
+        function testSSE() {
+            log('Testing SSE connection...');
+            const eventSource = new EventSource(`${serverUrl}/sse`);
+            
+            eventSource.onopen = () => {
+                log('SSE connection opened');
+                setStatus('SSE connection established!');
+            };
+            
+            eventSource.onmessage = (event) => {
+                log('SSE message received: ' + event.data);
+            };
+            
+            eventSource.onerror = (error) => {
+                log('SSE error occurred', true);
+                setStatus('SSE connection error', true);
+                eventSource.close();
+            };
+            
+            // Close after 5 seconds
+            setTimeout(() => {
+                eventSource.close();
+                log('SSE connection closed');
+            }, 5000);
+        }
+        
+        async function listResources() {
+            try {
+                log('Attempting to list resources via SSE...');
+                setStatus('This requires a proper MCP client implementation', true);
+                log('Note: Listing resources requires implementing the full MCP protocol over SSE');
+            } catch (error) {
+                log('Error: ' + error.message, true);
+            }
+        }
+        
+        // Initial test
+        window.onload = () => {
+            log('Page loaded. Click buttons to test endpoints.');
+        };
+    </script>
+</body>
+</html>

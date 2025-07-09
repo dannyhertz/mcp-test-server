@@ -1,0 +1,15 @@
+{
+  "name": "mcp-test-server",
+  "version": "1.0.0",
+  "description": "Simple MCP server for testing CSV and image resources",
+  "type": "module",
+  "main": "mcp-test-server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
