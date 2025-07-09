@@ -39,24 +39,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Initial SSE connection
-app.post('/sse', (req, res) => {
-  const sessionId = randomUUID();
-  sessions.set(sessionId, { created: new Date() });
-  
-  console.log(`[${new Date().toISOString()}] New session: ${sessionId}`);
-  
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  });
-  
-  res.write(`event: endpoint\ndata: /sse?sessionId=${sessionId}\n\n`);
-  res.end();
-});
-
-// Handle session requests
+// Handle all POST requests to /sse
 app.post('/sse', async (req, res) => {
   const sessionId = req.query.sessionId;
   
