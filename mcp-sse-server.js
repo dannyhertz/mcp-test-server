@@ -81,7 +81,7 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({ 
     name: 'mcp-image-test',
-    info: 'Connect your MCP client using SSE transport'
+    sse_endpoint: `${req.protocol}://${req.get('host')}/sse`
   });
 });
 
@@ -91,8 +91,8 @@ const sseHandler = async (req, res) => {
   console.log(`[SSE] ${req.method} request received`);
   
   try {
-    // Create transport with the base path (not including query params)
-    const transport = new SSEServerTransport('/', res);
+    // Create transport with the base path
+    const transport = new SSEServerTransport('/sse', res);
     
     // Connect the transport to our server
     await mcpServer.connect(transport);
@@ -111,11 +111,15 @@ const sseHandler = async (req, res) => {
   }
 };
 
-// Use a single endpoint that handles both GET and POST
-app.get('/', sseHandler);
-app.post('/', sseHandler);
+// SSE endpoint - handles both GET and POST
+app.get('/sse', sseHandler);
+app.post('/sse', sseHandler);
+
+// Also handle requests with session IDs
+app.get('/sse/:sessionId', sseHandler);
+app.post('/sse/:sessionId', sseHandler);
 
 app.listen(PORT, () => {
   console.log(`MCP SSE Server running on port ${PORT}`);
-  console.log(`Connect to: http://localhost:${PORT}/`);
+  console.log(`Connect to: http://localhost:${PORT}/sse`);
 });
