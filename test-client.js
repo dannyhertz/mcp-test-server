@@ -1,7 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 
-const url = process.argv[2] || 'http://localhost:3002/mcp';
+const url = process.argv[2] || 'https://mcp-test-server-p506.onrender.com/mcp';
 
 console.log(`Testing MCP server at: ${url}`);
 
