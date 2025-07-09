@@ -272,7 +272,8 @@ app.get('/health', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`MCP Server running on port ${PORT}`);
-  console.log(`SSE endpoint: http://localhost:${PORT}/sse`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`MCP HTTP Server (with SSE) running on port ${PORT}`);
+  console.log(`SSE endpoint available at: /sse`);
+  console.log(`Health check available at: /health`);
+  console.log(`Test page available at: /`);
 });
