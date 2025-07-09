@@ -252,9 +252,22 @@ app.get('/', (req, res) => {
 </html>`);
 });
 
-// Create SSE endpoint
+// Create SSE endpoint for GET requests
 app.get('/sse', async (req, res) => {
-  console.log('Client connected to SSE endpoint');
+  console.log('Client connected to SSE endpoint via GET');
+  const transport = new SSEServerTransport('/sse', res);
+  await mcpServer.connect(transport);
+  
+  // Handle client disconnect
+  req.on('close', () => {
+    console.log('Client disconnected');
+    transport.close();
+  });
+});
+
+// Create SSE endpoint for POST requests (required by SSE client)
+app.post('/sse', express.json(), async (req, res) => {
+  console.log('Client connected to SSE endpoint via POST');
   const transport = new SSEServerTransport('/sse', res);
   await mcpServer.connect(transport);
   
