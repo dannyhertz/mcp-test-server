@@ -83,6 +83,7 @@ app.all('/mcp', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`MCP Image Test Server v2 running on port ${PORT}`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
+  console.log(`Deployed at: ${new Date().toISOString()}`);
 });
