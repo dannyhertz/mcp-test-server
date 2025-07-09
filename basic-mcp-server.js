@@ -154,7 +154,20 @@ app.get('/sse', (req, res) => {
   const sessionId = req.query.sessionId;
   
   if (!sessionId) {
-    res.status(400).send('Session ID required');
+    // Initial GET request - return session endpoint like POST does
+    const newSessionId = randomUUID();
+    sessions.set(newSessionId, { created: new Date() });
+    
+    console.log(`[${new Date().toISOString()}] New session via GET: ${newSessionId}`);
+    
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    });
+    
+    res.write(`event: endpoint\ndata: /sse?sessionId=${newSessionId}\n\n`);
+    res.end();
     return;
   }
   
