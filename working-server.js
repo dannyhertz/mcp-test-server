@@ -1,4 +1,9 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import { 
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema 
+} from '@modelcontextprotocol/sdk/types.js';
 import express from 'express';
 import cors from 'cors';
 
@@ -18,7 +23,7 @@ const mcpServer = new Server({
 });
 
 // Set up resource handlers
-mcpServer.setRequestHandler('resources/list', async () => {
+mcpServer.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
     resources: [
       {
@@ -37,7 +42,7 @@ mcpServer.setRequestHandler('resources/list', async () => {
   };
 });
 
-mcpServer.setRequestHandler('resources/read', async (request) => {
+mcpServer.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
   
   if (uri === 'image://test-image') {
@@ -77,7 +82,6 @@ app.get('/', (req, res) => {
 
 // SSE endpoint - exactly as MCP SDK expects
 app.all('/mcp', async (req, res) => {
-  const { SSEServerTransport } = await import('@modelcontextprotocol/sdk/server/sse.js');
   const transport = new SSEServerTransport('/mcp', res);
   await mcpServer.connect(transport);
 });
