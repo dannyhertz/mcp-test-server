@@ -95,25 +95,46 @@ app.get('/', (req, res) => {
   });
 });
 
+// Store active transports by session ID
+const sessions = new Map();
+
 // SSE endpoint - this is where MCP clients connect
 app.all('/sse', async (req, res) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} /sse`);
+  const sessionId = req.query.sessionId;
+  console.log(`[${new Date().toISOString()}] ${req.method} /sse${sessionId ? '?sessionId=' + sessionId : ''}`);
   
-  // SSEServerTransport handles everything
-  const transport = new SSEServerTransport('/sse', res);
-  await mcp.connect(transport);
-  
-  // Keep connection alive
-  const keepAlive = setInterval(() => {
-    if (res.writableEnded) {
-      clearInterval(keepAlive);
+  try {
+    // Create and store transport
+    const transport = new SSEServerTransport('/sse', res);
+    
+    // If this is a session request, reuse the existing MCP connection
+    if (sessionId && sessions.has(sessionId)) {
+      console.log(`Reusing session ${sessionId}`);
     }
-  }, 30000);
-  
-  req.on('close', () => {
-    clearInterval(keepAlive);
-    console.log(`[${new Date().toISOString()}] Client disconnected`);
-  });
+    
+    // Connect transport to MCP server
+    await mcp.connect(transport);
+    
+    // Store session if we got one
+    const responseSessionId = res.getHeader('X-Session-ID');
+    if (responseSessionId) {
+      sessions.set(responseSessionId, transport);
+    }
+    
+    // Clean up on disconnect
+    req.on('close', () => {
+      console.log(`[${new Date().toISOString()}] Client disconnected`);
+      if (responseSessionId) {
+        sessions.delete(responseSessionId);
+      }
+    });
+    
+  } catch (error) {
+    console.error('SSE error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 });
 
 // Start server
